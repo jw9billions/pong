@@ -1,3 +1,17 @@
+//Animate
+var animate = window.requestAnimationFrame ||
+  window.webkitRequestAnimationFrame ||
+  window.mozRequestAnimationFrame ||
+  window.oRequestAnimationFrame ||
+  window.msRequestAnimationFrame ||
+  function(callback) {
+    window.setTimeout(callback, 1000/60)
+  };
+
+window.onload = function () {
+  init();
+  step();
+};
 
 var canvas, context, width, height;
 
@@ -47,7 +61,7 @@ function Paddle(x, y) {
   };
 }
 
-//Move distance along y -- 'dy'
+//Move distance along y -- 'pix'
 Paddle.prototype.move = function (dy){
   this.y += dy;
 
@@ -80,21 +94,6 @@ Paddle.prototype.render = function () {
   context.fillRect(this.x, this.y, this.width, this.height);
 }
 
-function onKeyDown(e) {
-  if (e.keyCode === 38) { // up arrow
-    //Move 5 pixels on y towards the origin if y >= 30 pixels (has room to move 10 pix to top)
-    if (human.paddle.y >= 25) {
-      human.paddle.move(-5);
-    }
-  }
-
-  if (e.keyCode === 40) { //down arrow
-    //Move 5 pixels on y axis away from the origin if y position <=375 pix (still has room move 10 pix to bottom boundary)
-    if (human.paddle.y <= 375) {
-      human.paddle.move(5);
-    }
-  }
-}
 //two paddles
 function Human () {
   this.paddle = new Paddle(30, 200);
@@ -137,6 +136,35 @@ var ball = new Ball;
 Ball.prototype.update = function (human, computer) {
   var p1 = human.paddle;
   var p2 = computer.paddle;
+
+  this.x += this.x_speed;
+  this.y += this.y_speed;
+
+  this.edge.left += this.x_speed;
+  this.edge.right += this.x_speed;
+
+  this.edge.top += this.y_speed;
+  this.edge.bottom += this.y_speed;
+
+  //If ball's left edge === right edge of the paddle
+  //&& if the ball within the paddle top and bottom edges ---hit!
+  if (this.edge.left === p1.edge.right) {
+    if (this.edge.top < p1.edge.bottom && this.edge.bottom > p1.edge.top) {
+      console.log('hit!');
+      this.x_speed = -this.x_speed;
+    } else {
+      console.log('missed the paddle');
+    }
+  }
+
+  if (this.edge.right === p2.edge.left) {
+    if (this.edge.top < p2.edge.bottom && this.edge.bottom > p2.edge.top){
+      console.log('hit!');
+      this.x_speed = -this.x_speed;
+    } else {
+      console.log ('missed the paddle');
+    }
+  }
 };
 
 var update = function () {
@@ -146,9 +174,9 @@ var update = function () {
 
 var render = function (){
   paintCanvas();
+  drawBoundaries();
   human.paddle.render();
   computer.paddle.render();
-  drawBoundaries();
   ball.render();
 };
 
@@ -157,17 +185,4 @@ var step = function step() {
   update();
   render();
   animate(step);
-};
-
-//Animate
-var animate = window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.mozRequestAnimationFrame ||
-  function(callback) {
-    window.setTimeout(callback, 1000/60)
-  };
-
-window.onload = function () {
-  init();
-  step();
 };
