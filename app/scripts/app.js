@@ -71,23 +71,6 @@ Paddle.prototype.move = function (dy){
   this.y_speed += dy;
 }
 
-Paddle.prototype.update = function () {
-  for (var key in keysDown) {
-    var val = Number (key);
-    if (val === 38) { // keyup
-      if (human.paddle.y >= 25) { //move 5 pix on y to origin
-          human.paddle.move(-5); // only if paddle y >= 30pix, move 5pix to top boundary
-      }
-    }
-
-    if (val === 40) { // keydown
-      if (human.paddle.y <= 375) { //move 5pix on y away from origin
-        human.paddle.move(5); //ony if the paddle y position <= 375pix, still has rooom move 10pix to bottom
-      }
-    }
-  }
-}
-
 Paddle.prototype.render = function () {
   context.beginPath();
   context.fillStyle = this.color;
@@ -105,6 +88,41 @@ function Computer () {
 
 var human = new Human();
 var computer = new Computer();
+
+Human.prototype.update = function () {
+  for (var key in keysDown) {
+    var val = Number (key);
+    if (val === 38) { // keyup
+      if (human.paddle.y >= 25) { //move 5 pix on y to origin
+          human.paddle.move(-5); // only if paddle y >= 30pix, move 5pix to top boundary
+      }
+    }
+
+    if (val === 40) { // keydown
+      if (human.paddle.y <= 375) { //move 5pix on y away from origin
+        human.paddle.move(5); //ony if the paddle y position <= 375pix, still has rooom move 10pix to bottom
+      }
+    }
+  }
+};
+
+Computer.prototype.update = function (ball) {
+  var computer_y = ball.y;
+  var diff = -(this.paddle.y + this.paddle.width/2 - computer_y);
+  if (diff < 20 && diff < 24) { // max speed up
+    diff = -1;
+  } else if (diff > 24 && diff > 28) { //max speed down
+    diff = 1;
+  }
+
+  this.paddle.move(diff);
+
+  if (this.paddle.y < 24) {
+    thi.paddle.y = 24;
+  } else if (this.paddle.y + this.paddle.height > 610) {
+    this.paddle.y = (610 - this.paddle.height);
+  }
+};
 
 //Ball Constructor
 function Ball(){
@@ -169,7 +187,8 @@ Ball.prototype.update = function (human, computer) {
 
 var update = function () {
   ball.update(human, computer);
-  human.paddle.update();
+  human.update();
+  computer.update(ball);
 };
 
 var render = function (){
