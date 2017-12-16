@@ -14,6 +14,7 @@ window.onload = function () {
 };
 
 var canvas, context, width, height;
+var humanScore = 0, computerScore = 0;
 
 function init(){
   canvas = document.getElementById("table-canvas");
@@ -22,6 +23,14 @@ function init(){
   context = canvas.getContext("2d");
 }
 
+function drawScore() {
+	context.globalAlpha=0.2;
+	context.font = "bold 70px Verdana";
+	context.fillStyle = "black";
+	context.fillText(humanScore, 38, 100);
+	context.fillText(computerScore, 540, 100);
+	context.globalAlpha=1;
+}
 function paintCanvas (){
   context.fillStyle = "darkgreen";
   context.fillRect(0, 0, 650, 500);
@@ -90,11 +99,11 @@ Paddle.prototype.render = function () {
 
 //two paddles
 function Human () {
-  this.paddle = new Paddle(30, 200);
+  this.paddle = new Paddle(25, 200);
 }
 
 function Computer () {
-  this.paddle = new Paddle(605, 200);
+  this.paddle = new Paddle(610, 200);
 }
 
 var human = new Human();
@@ -148,7 +157,7 @@ Computer.prototype.update = function (ball) {
 };
 
 function randomVelocity() {
- var num = Math.floor(Math.random() * 6) + 1; // this will get a number between 1 and 5;
+ var num = Math.floor(Math.random() * 4) + 1; // this will get a number between 1 and 5;
  num *= Math.floor(Math.random() * 2) == 1 ? 1 : -1; // this will add minus sign in 50% of cases
  return num;
 }
@@ -201,6 +210,24 @@ Ball.prototype.update = function (human, computer) {
     this.y_speed = -this.y_speed;
   }
 
+  if (this.x < 20) { // computer scores
+    computerScore ++;
+    document.getElementById("computerScore").innerHTML = computerScore;
+    this.x = 375;
+    this.y = 250;
+    this.x_speed = 5;
+    this.y_speed = randomVelocity();
+
+  } else if (this.x > 610) {
+    humanScore ++;
+    document.getElementById("humanScore").innerHTML = humanScore;
+    this.x = 375;
+    this.y = 250;
+    this.x_speed = -5;
+    this.y_speed = randomVelocity();
+
+  }
+
   //If ball's left edge === right edge of the paddle
   //&& if the ball within the paddle top and bottom edges ---hit!
   if (this.edge.left === p1.edge.right) {
@@ -231,6 +258,7 @@ var update = function () {
 var render = function (){
   paintCanvas();
   drawBoundaries();
+  drawScore();
   human.paddle.render();
   computer.paddle.render();
   ball.render();
