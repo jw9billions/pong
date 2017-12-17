@@ -8,3 +8,11 @@
 #table-canvas {
   margin-top: 5%;
 }
+
+#gameover {
+  color: blue;
+  font-size: 25px;
+  font-weight: bold;
+  background-color: yellow;
+  border: 5px solid #9EE493;
+}

@@ -9,19 +9,40 @@ var animate = window.requestAnimationFrame ||
   };
 
 window.onload = function () {
-  init();
   step();
 };
 
-var canvas, context, width, height;
+var canvas, context;
+var width = 650, height = 500;
 var humanScore = 0, computerScore = 0;
 
-function init(){
-  canvas = document.getElementById("table-canvas");
-  canvas.width = "650";
-  canvas.height = "500";
-  context = canvas.getContext("2d");
-}
+//Steps for each repaint
+var step = function step() {
+  update();
+  render();
+  animate(step);
+};
+
+var render = function (){
+  paintCanvas();
+  drawBoundaries();
+  drawScore();
+  human.paddle.render();
+  computer.paddle.render();
+  ball.render();
+};
+
+var update = function () {
+  ball.update(human, computer);
+  human.update();
+  computer.update(ball);
+};
+
+canvas = document.getElementById("table-canvas");
+canvas.width = width;
+canvas.height = height;
+context = canvas.getContext("2d");
+
 
 function drawScore() {
 	context.globalAlpha=0.2;
@@ -31,6 +52,7 @@ function drawScore() {
 	context.fillText(computerScore, 540, 100);
 	context.globalAlpha=1;
 }
+
 function paintCanvas (){
   context.fillStyle = "darkgreen";
   context.fillRect(0, 0, 650, 500);
@@ -115,45 +137,12 @@ Human.prototype.update = function () {
   } else if (this.direction === 40) {
     human.paddle.move(5); //ony if the paddle y position <= 375pix, still has rooom move 10pix to bottom
   }
-
-  /*
-  for (var key in keysDown) {
-    var val = Number (key);
-    if (val === 38) { // keyup
-      if (human.paddle.y >= 25) { //move 5 pix on y to origin
-          human.paddle.move(-5); // only if paddle y >= 30pix, move 5pix to top boundary
-      }
-    }
-
-    if (val === 40) { // keydown
-      if (human.paddle.y <= 375) { //move 5pix on y away from origin
-        human.paddle.move(5); //ony if the paddle y position <= 375pix, still has rooom move 10pix to bottom
-      }
-    }
-  }
-  */
 };
 
 Computer.prototype.update = function (ball) {
   var computer_y = ball.y;
   var diff = -(this.paddle.y + this.paddle.height/2 - computer_y);
-  /*
-  if (diff < 0) { // max speed up
-    diff = -dif;
-  } else { //max speed down
-    diff = 3;
-  }
-  */
-
   this.paddle.move(diff);
-
-/*
-  if (this.paddle.y < 24) {
-    thi.paddle.y = 24;
-  } else if (this.paddle.y + this.paddle.height > 610) {
-    this.paddle.y = (610 - this.paddle.height);
-  }
-  */
 };
 
 function randomVelocity() {
@@ -213,18 +202,42 @@ Ball.prototype.update = function (human, computer) {
   if (this.x < 20) { // computer scores
     computerScore ++;
     document.getElementById("computerScore").innerHTML = computerScore;
-    this.x = 375;
+    this.x = 325;
     this.y = 250;
     this.x_speed = 5;
     this.y_speed = randomVelocity();
 
+    if (computerScore > 10) {
+      document.getElementById("gameover").innerHTML = "You lose. Click here to play again! 11 points to win";
+      document.getElementById("gameover").style.visibility = "visible";
+      //document.getElementById("gameover").style.background = "red";
+      computerScore = 0;
+      humanScore = 0;
+      document.getElementById("computerScore").innerHTML = computerScore;
+      document.getElementById("humanScore").innerHTML = humanScore;
+      this.x_speed = 0;
+      this.y_speed = 0;
+    }
+
   } else if (this.x > 610) {
     humanScore ++;
     document.getElementById("humanScore").innerHTML = humanScore;
-    this.x = 375;
+    this.x = 325;
     this.y = 250;
     this.x_speed = -5;
     this.y_speed = randomVelocity();
+
+    if (humanScore > 10) {
+      document.getElementById("gameover").innerHTML = "You won! Click here to play again! 11 points to win!";
+      document.getElementById("gameover").style.visibility = "visible";
+      //document.getElementById("gameover").style.background = "red";
+      computerScore = 0;
+      humanScore = 0;
+      document.getElementById("computerScore").innerHTML = computerScore;
+      document.getElementById("humanScore").innerHTML = humanScore;
+      this.x_speed = 0;
+      this.y_speed = 0;
+    }
 
   }
 
@@ -247,26 +260,4 @@ Ball.prototype.update = function (human, computer) {
       console.log ('missed the paddle');
     }
   }
-};
-
-var update = function () {
-  ball.update(human, computer);
-  human.update();
-  computer.update(ball);
-};
-
-var render = function (){
-  paintCanvas();
-  drawBoundaries();
-  drawScore();
-  human.paddle.render();
-  computer.paddle.render();
-  ball.render();
-};
-
-//Steps for each repaint
-var step = function step() {
-  update();
-  render();
-  animate(step);
 };
