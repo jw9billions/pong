@@ -165,7 +165,7 @@ function Ball(){
     bottom: this.y + 10
   }
 
-  this.x_speed = 10;
+  this.x_speed = -10;
   this.y_speed = randomVelocity();
 }
 
